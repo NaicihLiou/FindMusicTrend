@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+        <title>Top Songs | Find Music Trend</title>
+        <!-- Loading third party fonts -->
+        <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900" rel="stylesheet" type="text/css">
+        <link href="fonts/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <!-- Loading main css file -->
+        <link rel="stylesheet" href="style.css">
+        
+        <script src="https://kit.fontawesome.com/56ebe5a2e9.js" crossorigin="anonymous"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <!--
+        <script src="js/chart.js"></script>
+        <script src="js/jquery-1.11.2.js"></script>  
+        -->
+
+        <script src="js/config.js"></script>              
+        <script src="js/jquery-1.11.1.min.js"></script>     
+        <script src="js/plugins.js"></script>
+        <script src="js/app.js"></script>
+        <script>
+            function datafilter() {
+                input1 = document.getElementById("select_year").value
+                input2 = document.getElementById("select_genre").value
+
+                var db = firebase.database();  
+                
+                db.ref("MusicLink").once('value', function(snapshot_link){
+                    // console.log('first');
+                    youtube_spotify_links = snapshot_link.val();
+                }).then(function() { 
+                    // console.log(youtube_spotify_links.length);
+                }).then(function() {
+                    db.ref("TopSongSpotify").orderByChild("year").equalTo(input1).once('value', function(snapshot){
+                        var cols = ["title", "Youtube", "Spotify", "artist", "top genre", "year", "bpm", "nrgy", "dnce", "dB", "live", "val", "dur", "acous", "spch", "pop"];
+                        // console.log('len = '+youtube_spotify_links.length);
+
+                        if(snapshot.exists() && youtube_spotify_links.length > 0){
+                            console.log('start build table');
+                            console.log(youtube_spotify_links);
+                            var link_idx = 1;   
+                            var tr = "";                                                        
+                            snapshot.forEach(function(data){
+                                var dfb = data.val();
+                                tr += "<tr>";
+                                for (idx in cols){
+                                    // for (v in cols[idx].value){
+                                        // console.log(v);
+                                        // if (v == input1){
+                                            if(cols[idx]=="Youtube"){
+                                                var url = youtube_spotify_links[link_idx]["youtube_url"];
+                                                console.log('row '+link_idx+ ' =>  '+url);
+                                                if(url == 'NA'){
+                                                    tr += "<td>Youtube</td>";
+                                                }else{
+                                                    tr += "<td><a href=\""+url+"\">Youtube</a></td>";
+                                                }
+                                            }else if (cols[idx]=="Spotify") {
+                                                var url = youtube_spotify_links[link_idx]["spotify_url"];
+                                                //console.log('row '+link_idx+ ' =>  '+url);
+                                                if(url == 'NA'){
+                                                    tr += "<td>Spotify</td>";
+                                                }else{
+                                                    tr += "<td><a href=\""+url+"\">Spotify</a></td>";
+                                                }
+                                            }else{
+                                                tr += "<td>"+dfb[cols[idx]]+"</td>";
+                                            }
+                                        }
+                                    // }
+                                // }
+                                tr += "</tr>";
+                                link_idx = link_idx + 1;
+                            });
+                            $('#song_table').append(tr);
+                        }
+                    });
+                }).then(function() { console.log('fin build table') });
+            }             
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="js/ie-support/html5.js"></script>
+        <script src="js/ie-support/respond.js"></script>
+        <![endif]-->
+    </head>
+
+    <body style="color:#faf0e6;">
+        <style> a {color:#4F9D9D;} </style>
+        <div id="site-content">
+            <header class="site-header">
+                <div class="container">
+                    <a href="index.html" id="branding">
+                        <big class="title">Find Music Trend</big>
+                    </a> <!-- #branding -->
+                    <nav class="main-navigation">
+                        <button type="button" class="toggle-menu"><i class="fa fa-bars"></i></button>
+                        <ul class="menu">
+                            <li class="menu-item"><a href="index.html">Home</a></li>
+                            <li class="menu-item"><a href="about.html">About</a></li>
+                            <li class="menu-item current-menu-item"><a href="topsongs.html">Top Songs</a></li>
+                            <li class="menu-item"><a href="graph.html">Graph</a></li>
+                        </ul> <!-- .menu -->
+                    </nav> <!-- .main-navigation -->
+                </div>
+            </header> <!-- .site-header -->
+            
+            <main class="main-content">
+                <div class="container" style="height:50px">
+                    <form>
+                        <center>
+                            <div style="width:30%;display:inline;"><font color="#FFFFFF">YEAR: </font>
+                                <select name="select" id="select_year">
+                                    <option value="0"></option>
+                                    <option value="2010">2010</option>
+                                    <option value="2011">2011</option>
+                                    <option value="2012">2012</option>
+                                    <option value="2013">2013</option>
+                                    <option value="2014">2014</option>
+                                    <option value="2015">2015</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2019">2019</option>
+                                </select>
+                            </div>
+
+                            <div style="width:30%;display:inline;"><font color="#FFFFFF">GENRE: </font>
+                                <select name="select" id="select_genre">
+                                    <option value="0"></option>
+                                    <option value="acoustic pop">acoustic pop</option>
+                                    <option value="alaska indie">alaska indie</option>
+                                    <option value="alternative r&b">alternative r&b</option>
+                                    <option value="art pop">art pop</option>
+                                    <option value="atl hip hop">atl hip hop</option>
+                                    <option value="australian dance">australian dance</option>
+                                    <option value="australian hip hop">australian hip hop</option>
+                                    <option value="australian pop">australian pop</option>
+                                    <option value="barbadian pop">barbadian pop</option>
+                                    <option value="baroque pop">baroque pop</option>
+                                    <option value="belgian edm">belgian edm</option>
+                                    <option value="big room">big room</option>
+                                    <option value="boy band">boy band</option>
+                                    <option value="british soul">british soul</option>
+                                    <option value="brostep">brostep</option>
+                                    <option value="canadian contemporary r&b">canadian contemporary r&b</option>
+                                    <option value="canadian hip hop">canadian hip hop</option>
+                                    <option value="canadian latin">canadian latin</option>
+                                    <option value="canadian pop">canadian pop</option>
+                                    <option value="candy pop">candy pop</option>
+                                    <option value="celtic rock">celtic rock</option>
+                                    <option value="chicago rap">chicago rap</option>
+                                    <option value="colombian pop">colombian pop</option>
+                                    <option value="complextro">complextro</option>
+                                    <option value="contemporary country">contemporary country</option>
+                                    <option value="dance pop">dance pop</option>
+                                    <option value="danish pop">danish pop</option>
+                                    <option value="detroit hip hop">detroit hip hop</option>
+                                    <option value="downtempo">downtempo</option>
+                                    <option value="edm">edm</option>
+                                    <option value="electro">electro</option>
+                                    <option value="electro house">electro house</option>
+                                    <option value="electronic trap">electronic trap</option>
+                                    <option value="electropop">electropop</option>
+                                    <option value="escape room">escape room</option>
+                                    <option value="folk-pop">folk-pop</option>
+                                    <option value="french indie pop">french indie pop</option>
+                                    <option value="hip hop">hip hop</option>
+                                    <option value="hollywood">hollywood</option>
+                                    <option value="house">house</option>
+                                    <option value="indie pop">indie pop</option>
+                                    <option value="irish singer-songwriter">irish singer-songwriter</option>
+                                    <option value="latin">latin</option>
+                                    <option value="metropopolis">metropopolis</option>
+                                    <option value="moroccan pop">moroccan pop</option>
+                                    <option value="neo mellow">neo mellow</option>
+                                    <option value="permanent wave">permanent wave</option>
+                                    <option value="pop">pop</option>
+                                    <option value="tropical house">tropical house</option>
+                                </select>
+                            </div>
+
+                            <div style="width:30%;display:inline;">
+                                <input type="button" value="ENTER" onclick="datafilter()">
+                                <!-- <button type="button">ENTER</button>  -->
+                                <!-- <p class="enter" onclick="datafilter(dfb, 'TopSongSpotify')">ENTER</p> -->
+                                <!-- <p class="enter" onclick="datafilter(dfb, 'TopSongSpotify')"><font color="#FFFFFF">ENTER</font></p> -->
+                            </div>
+                        </center>
+                    </form>
+                </div>
+                
+                <div class="clear"></div>
+
+                <div class="data fontm">
+                    <script type="text/javascript">   
+                        var db = firebase.database();  
+                        db.ref("MusicLink").once('value', function(snapshot_link){
+                            console.log('first');   
+                            youtube_spotify_links = snapshot_link.val();
+                        }).then(function() { 
+
+                            console.log(youtube_spotify_links.length); 
+                        }).then(function() { 
+                            
+                            db.ref("TopSongSpotify").once('value', function(snapshot){
+                                var cols = ["title", "Youtube", "Spotify", "artist", "top genre", "year", "bpm", "nrgy", "dnce", "dB", "live", "val", "dur", "acous", "spch", "pop"]; 
+                                console.log('len = '+youtube_spotify_links.length);
+                                if(snapshot.exists() && youtube_spotify_links.length > 0){  
+                                    console.log('start build table'); 
+                                    console.log(youtube_spotify_links);
+                                    var link_idx = 1;   
+                                    var tr = "";                                                        
+                                    snapshot.forEach(function(data){
+                                        var dfb = data.val();                                                                       
+                                        tr += "<tr>";
+                                        for (idx in cols){ 
+                                            if(cols[idx]=="Youtube"){                                                       
+                                                var url = youtube_spotify_links[link_idx]["youtube_url"];
+                                                //console.log('row '+link_idx+ ' =>  '+url);
+                                                if(url == 'NA'){
+                                                    tr += "<td>Youtube</td>";
+                                                }else{
+                                                    tr += "<td><a href=\""+url+"\">Youtube</a></td>";
+                                                }
+                                            }else if (cols[idx]=="Spotify") {
+                                                var url = youtube_spotify_links[link_idx]["spotify_url"];
+                                                //console.log('row '+link_idx+ ' =>  '+url);
+                                                if(url == 'NA'){
+                                                    tr += "<td>Spotify</td>";
+                                                }else{
+                                                    tr += "<td><a href=\""+url+"\">Spotify</a></td>";
+                                                }                                               
+                                            }else{
+                                                tr += "<td>"+dfb[cols[idx]]+"</td>";
+                                            }                                        
+                                        }
+                                        tr += "</tr>";
+                                        link_idx = link_idx + 1;
+                                    });
+                                    $('#song_table').append(tr);
+                                }
+                            }); 
+                        }).then(function() { console.log('fin build table') });
+                                               
+                    </script>
+                    <table class="fontm" id="song_table">
+                        <thead>
+                            <tr>
+                                <th>Title <i class="fa fa-sort" ></i></th>
+                                <th>Youtube <i class="fa fa-sort"></i></th>
+                                <th>Spotify <i class="fa fa-sort"></i></th>
+                                <th>Artist <i class = 'fa fa-sort' ></i></th>
+                                <th>Top Genre <i class = 'fa fa-sort' ></i></th>
+                                <th>Year <i class = 'fa fa-sort' ></i></th>
+                                <th>bpm <i class = 'fa fa-sort' ></i></th>
+                                <th>nrgy <i class = 'fa fa-sort' ></i></th>
+                                <th>dnce <i class = 'fa fa-sort' ></i></th>
+                                <th>dB <i class = 'fa fa-sort' ></i></th>
+                                <th>live <i class = 'fa fa-sort' ></i></th>
+                                <th>val <i class = 'fa fa-sort' ></i></th>
+                                <th>dur <i class = 'fa fa-sort' ></i></th>
+                                <th>acous <i class = 'fa fa-sort' ></i></th>
+                                <th>spch <i class = 'fa fa-sort' ></i></th>
+                                <th>pop <i class = 'fa fa-sort' ></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <td id="Title" style="width:300px;table-layout:fixed;word-wrap:break-word;"></td>
+                            <td id="Youtube"></td>
+                            <td id="Spotify"></td>
+                            <td id="Artist"></td>
+                            <td id="Top Genre"></td>
+                            <td id="Year"></td>
+                            <td id="bpm"></td>
+                            <td id="nrgy"></td>
+                            <td id="dnce"></td>
+                            <td id="dB"></td>
+                            <td id="live"></td>
+                            <td id="val"></td>
+                            <td id="dur"></td>
+                            <td id="acous"></td>
+                            <td id="spch"></td>
+                            <td id="pop"></td>
+                           </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+        <script>
+            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+            const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+                )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+            document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+                const table = th.closest('table');
+                Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+                    .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+                    .forEach(tr => table.appendChild(tr) );
+            })));
+        </script>
+    </body>
+</html>
